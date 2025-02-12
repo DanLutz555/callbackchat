@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema({
 const MessageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   content: { type: String, required: true },
+  room: { type: String, required: true }, //saving roomName
   timestamp: { type: Date, default: Date.now },
 });
 
@@ -91,10 +92,25 @@ app.get("/messages", async (req, res) => {
     .sort("timestamp");
   res.json(messages);
 });
- 
+
+// מסלול לקבלת הודעות פרטיות לפי חדר
+app.get("/messages/:room", async (req, res) => {
+  const { room } = req.params;
+  const messages = await Message.find({ room })
+    .populate("sender", "email")
+    .sort("timestamp");
+  res.json(messages);
+});
+
 io.on("connection", (socket) => {
   console.log("New client connected");
-  //handle incoming chat messages
+  //Join room with email as room name
+  socket.on("joinRoom", (room) => {
+    socket.join(room);
+    socket.currentRoom = room;
+    console.log(`User joined room: ${room}`);
+  });
+
   socket.on("chatMessage", async (data) => {
     const { content, token } = data;
     try {
@@ -102,17 +118,27 @@ io.on("connection", (socket) => {
       const sender = await User.findById(decoded.id);
 
       if (sender) {
-        const message = new Message({ sender: sender._id, content });
+        const message = new Message({
+          sender: sender._id,
+          content,
+          room: socket.currentRoom,
+        });
         await message.save();
-        io.emit("chatMessage", { content, sender: sender.email });
+        //שליחת הודעה למשתתפים בחדר לכולם
+        io.to(socket.currentRoom).emit("chatMessage", {
+          content,
+          sender: sender.email,
+        });
       }
     } catch (err) {
       console.error("Invalid token", err);
     }
   });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
+
   socket.on("userDisconnected", async (email) => {
     const user = await User.findOne({ email });
     if (user) {
@@ -122,5 +148,6 @@ io.on("connection", (socket) => {
     }
   });
 });
+//משחק שש בש
 
 server.listen(3000, () => console.log("Server running on port 3000"));
