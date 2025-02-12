@@ -1,17 +1,25 @@
+/* --------------------- */
+/* עיצוב כללי         */
+/* --------------------- */
 body {
   font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
   margin: 0;
+  height: 100vh;
+  /* אין שימוש ב־flex כאן כדי שנוכל למקם את הסרגל הקבוע עם position */
 }
 
+/* --------------------- */
+/* Header (כותרת)       */
+/* --------------------- */
 .header {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px;
+  height: 60px;
+  box-sizing: border-box;
 }
 
 .header h2 {
@@ -30,31 +38,110 @@ body {
   background-color: #d32f2f;
 }
 
+/* --------------------- */
+/* Sidebar - רשימת משתמשים */
+/* --------------------- */
 .users-list {
   background-color: #f1f1f1;
+  width: 250px;
+  position: fixed;
+  top: 60px; /* מתחת לכותרת */
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
   padding: 10px;
-  width: 200px;
+  box-sizing: border-box;
 }
 
 .users-list h3 {
   margin-top: 0;
 }
 
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  padding: 10px;
+.users-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
+/* כל פריט ברשימה */
+.users-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* שם בצד ושאר האלמנטים בצד */
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* אם פריט פעיל */
+.users-list li.active {
+  background-color: #e0f7fa;
+}
+
+/* סטייל לסטטוס (נקודה) */
+.users-list li .status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.users-list li.online .status {
+  background-color: #4caf50;
+}
+
+.users-list li.offline .status {
+  background-color: #f44336;
+}
+
+/* אם המשתמש הוא עצמך – רקע שונה ואי-קליק */
+.users-list li.self {
+  background-color: #e0e0e0;
+  cursor: default;
+}
+
+/* כפתור למשחק שש בש */
+.game-button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  flex-shrink: 0; /* לא יתכווץ יחד עם הטקסט */
+}
+
+.game-button:hover {
+  background-color: #1976d2;
+}
+
+/* --------------------- */
+/* Chat Container - אזור הצ'אט */
+/* --------------------- */
+.chat-container {
+  margin-left: 250px; /* כדי לא להתפס על ה-sidebar */
+  padding: 10px;
+  height: calc(100vh - 60px); /* גובה מלא פחות כותרת */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* תיבת השיחות, מתמלאת את השטח הפנימי */
 .chat-box {
   flex-grow: 1;
   border: 1px solid #ccc;
   padding: 10px;
   overflow-y: auto;
   margin-bottom: 10px;
+  box-sizing: border-box;
 }
 
+/* Input area */
 .input-container {
   display: flex;
 }
@@ -65,10 +152,11 @@ body {
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
+  box-sizing: border-box;
 }
 
 #send-button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -80,6 +168,7 @@ body {
   background-color: #45a049;
 }
 
+/* הודעות בצ'אט */
 .message {
   margin-bottom: 10px;
   padding: 5px 10px;
@@ -91,6 +180,6 @@ body {
   margin-bottom: 10px;
   padding: 5px 10px;
   background-color: #f0f0f0;
-  border-left: 5px solid #4CAF50;
+  border-left: 5px solid #4caf50;
   font-style: italic;
 }
