@@ -149,6 +149,48 @@ io.on("connection", (socket) => {
   });
 });
 //משחק שש בש
+io.on("connection", (socket) => {
+  console.log(`🔌 ${socket.id} connected`);
+
+  socket.on("inviteToGame", ({ opponentEmail }) => {
+    console.log(`🎲 ${socket.id} invited ${opponentEmail} to play.`);
+
+    // חיפוש המשתמש לפי מייל ושליחת הזמנה
+    const opponentSocket = Object.values(io.sockets.sockets).find(
+      (s) => s.email === opponentEmail
+    );
+    if (opponentSocket) {
+      io.to(opponentSocket.id).emit("gameInvite", { from: socket.email });
+      console.log(`📩 Invitation sent to ${opponentEmail}`);
+    } else {
+      console.log(`⚠️ User ${opponentEmail} is not connected.`);
+    }
+  });
+
+  socket.on("acceptGame", ({ opponentID }) => {
+    console.log(`✅ ${socket.id} accepted the game with ${opponentID}`);
+
+    const gameID = `${socket.id}-${opponentID}`;
+
+    games[gameID] = {
+      player1: socket.id,
+      player2: opponentID,
+      turn: null,
+      firstRolls: {},
+    };
+
+    socket.join(gameID);
+    io.to(opponentID).emit("gameStart", { gameID, opponent: socket.id });
+    io.to(socket.id).emit("gameStart", { gameID, opponent: opponentID });
+
+    io.to(gameID).emit("rollForFirstTurn", { gameID });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`❌ ${socket.id} disconnected.`);
+  });
+});
+
 
 server.listen(3000, () => console.log("Server running on port 3000"));
 //
